@@ -4,6 +4,9 @@ export default {
     getAll() {
         return api.get('/readers/get/readers')
     },
+    getPage(page = 0, size = 15) {
+        return api.get(`/readers/get/readers?page=${page}&size=${size}`);
+    },
     get(id) {
         return api.get(`/readers/get/reader/${id}`)
     },

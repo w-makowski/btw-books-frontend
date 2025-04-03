@@ -4,6 +4,9 @@ export default {
     getAll() {
         return api.get('/authors')
     },
+    getPage(page = 0, size = 15) {
+        return api.get(`/authors?page=${page}&size=${size}`);
+    },
     get(id) {
         return api.get(`/authors/${id}`)
     },
