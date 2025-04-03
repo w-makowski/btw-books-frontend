@@ -2,7 +2,7 @@
     <div class="main-layout d-flex flex-column min-vh-100">
         <Navbar />
         <div class="container py-4">
-            <slot></slot>
+            <router-view />
         </div>
         <Footer />
     </div>

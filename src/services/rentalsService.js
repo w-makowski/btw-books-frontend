@@ -2,7 +2,7 @@ import api from './api'
 
 export default {
     getAll() {
-        return api.get('/reantals/get/rentals')
+        return api.get('/rentals/get/rentals')
     },
     get(id) {
         return api.get(`/rentals/get/rental/${id}`)
