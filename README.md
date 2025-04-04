@@ -1,29 +1,47 @@
 # ztw-books-frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+ZTW Books is a web application for managing a Library made for **Advanced Web Technologies** Course at **Wrocław University of Science and Technology**.
 
-## Recommended IDE Setup
+It includes functionalities for managing books, authors, readers, and rentals. 
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+**Frontend**: Vue 3 + Vite
 
-## Customize configuration
+**Backend (REST API)**: [ztw-books-backend](https://github.com/banacchini/ztw-books-backend)
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+
 
 ## Project Setup
+
+1. Clone the repositry:
+
+```sh
+git clone https://github.com/w-makowski/btw-books-frontend.git
+```
+
+2. Navigate to repository:
+
+```sh
+cd ztw-books-frontend
+```
+
+3. Install dependecies:
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+4. Compile and Hot-Reload for Development
 
 ```sh
 npm run dev
 ```
+Application will be available at http://localhost:5173 
 
-### Compile and Minify for Production
+
+### API Configuration
+
+The application communicates with a REST API backend. By default, we assume that the backend is running on http://localhost:8080. If it is not, change the address in the .env file:
 
 ```sh
-npm run build
+VITE_API_BASE_URL=http://your-backend.com
 ```
