@@ -12,10 +12,10 @@ It includes functionalities for managing books, authors, readers, and rentals.
 
 ## Project Setup
 
-1. Clone the repositry:
+1. Clone the repository:
 
 ```sh
-git clone https://github.com/w-makowski/btw-books-frontend.git
+git clone https://github.com/w-makowski/ztw-books-frontend.git
 ```
 
 2. Navigate to repository:
