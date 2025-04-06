@@ -30,7 +30,7 @@ const routes = [
             {
                 path: '/books/:id',
                 name: 'BookDetails',
-                component: () => import('@/components/books/BookForm.vue'),
+                component: () => import('@/components/books/BookDetails.vue'),
                 props: route => ({ id: parseInt(route.params.id) })
             },
             {
