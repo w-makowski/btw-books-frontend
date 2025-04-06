@@ -1,5 +1,5 @@
 <template>
-    <div class="authors-page">
+    <div class="books-page">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>Books</h1>
             <router-link to="/books/add" class="btn btn-primary">
