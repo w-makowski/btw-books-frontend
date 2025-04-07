@@ -2,7 +2,7 @@ import api from './api'
 
 export default {
     getAll() {
-        return api.get('/readers/get/readers')
+        return api.get('/readers')
     },
     getPage(page = 0, size = 15) {
         return api.get(`/readers/get/readers?page=${page}&size=${size}`);
