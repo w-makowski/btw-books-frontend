@@ -14,6 +14,13 @@
       
       <LoadingSpinner v-if="loading" />
       <ErrorMessage v-else-if="error" :message="error" @retry="loadRental" />
+
+      <ErrorModal
+      v-if="modalError"
+      :status="modalErrorStatus"
+      :message="modalError"
+      @close="handleErrorModalClose"
+      />
       
       <div v-else-if="rental" class="row">
         <div class="col-md-4 mb-4">
@@ -119,12 +126,14 @@ import booksService from '@/services/booksService'
 import authorsService from '@/services/authorsService'
 import LoadingSpinner from '@/components/shared/LoadingSpinner.vue'
 import ErrorMessage from '@/components/shared/ErrorMessage.vue'
+import ErrorModal from '@/components/shared/ErrorModal.vue'
   
   export default {
     name: 'RentalDetails',
     components: {
       LoadingSpinner,
-      ErrorMessage
+      ErrorMessage,
+      ErrorModal
     },
     props: {
       id: {
@@ -138,13 +147,19 @@ import ErrorMessage from '@/components/shared/ErrorMessage.vue'
         loading: true,
         error: null,
         showModal: false,
-        rentalToReturnId: null
+        rentalToReturnId: null,
+        modalError: '',
+        modalErrorStatus: ''
       }
     },
     mounted() {
       this.loadRental()
     },
     methods: {
+        handleErrorModalClose() {
+            this.modalError = ''
+            this.modalErrorStatus = ''
+        },
         confirmReturn(id) {
             this.rentalToReturnId = id
             this.showModal = true

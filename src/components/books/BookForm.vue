@@ -77,12 +77,14 @@
 import booksService from '@/services/booksService'
 import LoadingSpinner from '@/components/shared/LoadingSpinner.vue'
 import ErrorMessage from '@/components/shared/ErrorMessage.vue'
+import ErrorModal from '@/components/shared/ErrorModal.vue'
   
   export default {
     name: 'BookForm',
     components: {
       LoadingSpinner,
-      ErrorMessage
+      ErrorMessage,
+      ErrorModal
     },
     props: {
       id: {
@@ -102,7 +104,9 @@ import ErrorMessage from '@/components/shared/ErrorMessage.vue'
         error: null,
         submitted: false,
         isSaving: false,
-        dateError: ''
+        dateError: '',
+        modalError: '',
+        modalErrorStatus: ''
       }
     },
     computed: {
@@ -116,6 +120,10 @@ import ErrorMessage from '@/components/shared/ErrorMessage.vue'
       }
     },
     methods: {
+      handleErrorModalClose() {
+        this.modalError = ''
+        this.modalErrorStatus = ''
+      },
       loadBook() {
         this.loading = true
         this.error = null
@@ -165,7 +173,22 @@ import ErrorMessage from '@/components/shared/ErrorMessage.vue'
           })
           .catch(error => {
             console.error('Error saving book:', error)
-            alert("Couldn't save book's data. Try again later.")
+            const status = error?.response?.status
+            const message = error?.response?.data?.message || "Unexpected error"
+            const status2 = error?.response?.data?.status || 500
+
+            if (status === 404) {
+                this.$router.push({
+                    name: 'ErrorPage',
+                    query: {
+                        message,
+                        status2
+                    }
+                })
+            } else {
+                this.modalError = message
+                this.modalErrorStatus = error?.response?.data?.status
+            }
           })
           .finally(() => {
             this.isSaving = false

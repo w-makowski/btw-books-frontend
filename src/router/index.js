@@ -98,7 +98,16 @@ const routes = [
                 name: 'RentalDetails',
                 component: () => import('@/components/rentals/RentalDetails.vue'),
                 props: route => ({ id: parseInt(route.params.id) })
-            }
+            },
+            {
+                path: '/error',
+                name: 'ErrorPage',
+                component: () => import('@/views/NotFound.vue'),
+                props: route => ({
+                  message: route.query.message,
+                  status: route.query.status
+                })
+              }
         ]
     },
     {
