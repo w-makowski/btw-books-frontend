@@ -21,35 +21,38 @@
         <div class="card-body">
           <form @submit.prevent="saveRental" novalidate>
             <div class="row mb-3">
-
               <div class="col-md-6">
-                <label for="bookId" class="form-label">Book ID*</label>
-                <input 
-                  type="number"
-                  min="0"
-                  step="1"
-                  class="form-control" 
-                  id="book" 
-                  v-model="form.bookId"
-                  :class="{ 'is-invalid': submitted && !form.bookId }"
-                  required
+                <label for="bookId" class="form-label">Book</label>
+                <select
+                    class="form-select"
+                    id="bookId"
+                    v-model="form.bookId"
+                    :class="{ 'is-invalid': submitted && !form.bookId }"
+                    :disabled="loading"
+                    required
                 >
-                <div class="invalid-feedback">Book is obligatory</div>
+                  <option value="">{{ loading ? 'Loading...' : 'Select a book' }}</option>
+                  <option v-for="book in books" :key="book.id" :value="book.id">
+                    {{ book.id }} - {{ book.title }} ({{book.authorName }})
+                  </option>
+                </select>
               </div>
 
               <div class="col-md-6">
-                <label for="readerId" class="form-label">Reader ID*</label>
-                <input 
-                  type="number"
-                  min="0"
-                  step="1"
-                  class="form-control" 
-                  id="reader" 
-                  v-model="form.readerId"
-                  :class="{ 'is-invalid': submitted && !form.readerId }"
-                  required
+                <label for="readerId" class="form-label">Reader</label>
+                <select
+                    class="form-select"
+                    id="readerId"
+                    v-model="form.readerId"
+                    :class="{ 'is-invalid': submitted && !form.readerId }"
+                    :disabled="loading"
+                    required
                 >
-                <div class="invalid-feedback">Reader is obligatory</div>
+                  <option value="">{{ loading ? 'Loading...' : 'Select a reader' }}</option>
+                  <option v-for="reader in readers" :key="reader.id" :value="reader.id">
+                    {{ reader.id }} - {{ reader.name }}
+                  </option>
+                </select>
               </div>
 
               <div class="col-md-6">
@@ -97,9 +100,12 @@
   
 <script>
 import rentalsService from '@/services/rentalsService'
+import booksService from '@/services/booksService'
+import readersService from "@/services/readersService.js";
 import LoadingSpinner from '@/components/shared/LoadingSpinner.vue'
 import ErrorMessage from '@/components/shared/ErrorMessage.vue'
 import ErrorModal from '@/components/shared/ErrorModal.vue'
+import authorsService from "@/services/authorsService.js";
 
   
   export default {
@@ -130,7 +136,9 @@ import ErrorModal from '@/components/shared/ErrorModal.vue'
         isSaving: false,
         dateError: '',
         modalError: '',
-        modalErrorStatus: ''
+        modalErrorStatus: '',
+        books: [],
+        readers: []
       }
     },
     computed: {
@@ -149,10 +157,81 @@ import ErrorModal from '@/components/shared/ErrorModal.vue'
         this.loadRental()
       }
     },
+    created() {
+      this.loadBooks()
+      this.loadReaders()
+    },
     methods: {
       handleErrorModalClose() {
         this.modalError = ''
         this.modalErrorStatus = ''
+      },
+      // loadBooks(){
+      //   this.loading = true
+      //   this.error = null
+      //
+      //   booksService.getAll()
+      //     .then(response => {
+      //       this.books = response.data
+      //       this.loading = false
+      //     })
+      //     .catch(error => {
+      //       console.error('Error loading books:', error)
+      //       this.error = "Couldn't load books. Try again later."
+      //       this.loading = false
+      //     })
+      // },
+      loadBooks() {
+        this.loading = true
+        this.error = null
+
+        booksService.getAll()
+            .then(response => {
+              const tBooks = response.data
+              const booksPromises = tBooks.map((book) => {
+                return Promise.all([
+                  authorsService.get(book.authorId)
+                ])
+                    .then(([authorResponse]) => {
+                      if (authorResponse.status === 200) {
+                        book.authorName = authorResponse.data.name;
+                      } else {
+                        console.error(authorResponse)
+                        console.error(`Author with ID ${book.authorId} not found`);
+                        book.authorName = 'Unknown author';
+                      }
+                    })
+                    .catch(error => {
+                      console.error('Error loading author data:', error);
+                    })
+              })
+              Promise.all(booksPromises)
+                  .then(() => {
+                    this.books = tBooks;
+                    console.log('books:', this.books);
+                  });
+              this.loading = false
+            })
+            .catch(error => {
+              console.error('Error while loading books:', error);
+              this.error = "Couldn't load books"
+              this.loading = false
+            });
+      },
+      loadReaders(){
+        this.loading = true
+        this.error = null
+
+        readersService.getAll()
+          .then(response => {
+            this.readers = response.data
+            this.loading = false
+          })
+          .catch(error => {
+            console.error('Error loading readers:', error)
+            this.error = "Couldn't load readers. Try again later."
+            this.loading = false
+          })
       },
       loadRental() {
         this.loading = true

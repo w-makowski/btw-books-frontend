@@ -28,18 +28,20 @@
               </div>
 
               <div class="col-md-6">
-                <label for="authorId" class="form-label">Author ID*</label>
-                <input 
-                  type="number"
-                  min="0"
-                  step="1"
-                  class="form-control" 
-                  id="author" 
-                  v-model="form.authorId"
-                  :class="{ 'is-invalid': submitted && !form.authorId }"
-                  required
+                <label for="authorId" class="form-label">Author*</label>
+                <select
+                    class="form-select"
+                    id="authorId"
+                    v-model="form.authorId"
+                    :class="{ 'is-invalid': submitted && !form.authorId }"
+                    :disabled="loading"
+                    required
                 >
-                <div class="invalid-feedback">Author is obligatory</div>
+                  <option value="">{{ loading ? 'Loading...' : 'Select an author' }}</option>
+                  <option v-for="author in authors" :key="author.id" :value="author.id">
+                    {{ author.id }} - {{ author.name }}
+                  </option>
+                </select>
               </div>
 
               <div class="col-md-6">
@@ -75,6 +77,7 @@
   
 <script>
 import booksService from '@/services/booksService'
+import authorsService from '@/services/authorsService'
 import LoadingSpinner from '@/components/shared/LoadingSpinner.vue'
 import ErrorMessage from '@/components/shared/ErrorMessage.vue'
 import ErrorModal from '@/components/shared/ErrorModal.vue'
@@ -106,7 +109,8 @@ import ErrorModal from '@/components/shared/ErrorModal.vue'
         isSaving: false,
         dateError: '',
         modalError: '',
-        modalErrorStatus: ''
+        modalErrorStatus: '',
+        authors: []
       }
     },
     computed: {
@@ -119,10 +123,27 @@ import ErrorModal from '@/components/shared/ErrorModal.vue'
         this.loadBook()
       }
     },
+    created() {
+      this.loadAuthors()
+    },
     methods: {
       handleErrorModalClose() {
         this.modalError = ''
         this.modalErrorStatus = ''
+      },
+      loadAuthors() {
+        this.loading = true
+        authorsService.getAll()
+          .then(response => {
+            this.authors = response.data
+          })
+          .catch(error => {
+            console.error('Error loading authors:', error)
+            this.error = "Couldn't load authors. Try again later."
+          })
+          .finally(() => {
+            this.loading = false
+          })
       },
       loadBook() {
         this.loading = true
