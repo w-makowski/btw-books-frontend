@@ -11,7 +11,7 @@ export default {
         return api.get(`/rentals/get/rental/${id}`)
     },
     create(rental) {
-        return api.post('/rentals/add/rental', rental)
+        return api.post('/rentals/rent/book', rental)
     },
     update(id, rental) {
         return api.put(`/rentals/update/rental/${id}`, rental)
