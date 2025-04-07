@@ -19,13 +19,13 @@
                         <td>
                             <div class="btn-group btn-group-sm">
                                 <router-link :to="`/books/${book.id}`" class="btn btn-info">
-                                    <i class="bi bi-eye"></i>
+                                    <i class="bi bi-eye">details</i>
                                 </router-link>
                                 <router-link :to="`/books/edit/${book.id}`" class="btn btn-warning">
-                                    <i class="bi bi-pencil"></i>
+                                    <i class="bi bi-pencil">edit</i>
                                 </router-link>
                                 <button @click="$emit('delete', book)" class="btn btn-danger">
-                                    <i class="bi bi-trash"></i>
+                                    <i class="bi bi-trash">delete</i>
                                 </button>
                             </div>
                         </td>
