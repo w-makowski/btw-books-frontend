@@ -10,6 +10,13 @@
         <LoadingSpinner v-if="loading" />
         <ErrorMessage v-else-if="error" :message="error" @retry="fetchReaders" />
         
+        <ErrorModal
+        v-if="modalError"
+        :status="modalErrorStatus"
+        :message="modalError"
+        @close="handleErrorModalClose"
+        />
+
         <div v-else>
             <ReadersList 
                 :readers="readers" 
@@ -50,13 +57,15 @@ import readersService from '@/services/readersService';
 import ReadersList from '@/components/readers/ReadersList.vue'
 import LoadingSpinner from '@/components/shared/LoadingSpinner.vue'
 import ErrorMessage from '@/components/shared/ErrorMessage.vue'
+import ErrorModal from '@/components/shared/ErrorModal.vue'
 
 export default {
     name: 'Readers',
     components: {
         ReadersList,
         LoadingSpinner,
-        ErrorMessage
+        ErrorMessage,
+        ErrorModal
     },
     data() {
         return {
@@ -67,10 +76,16 @@ export default {
             pageSize: 15,
             totalPages: 1,
             readerToDelete: null,
-            deleteModal: null
+            deleteModal: null,
+            modalError: '',
+            modalErrorStatus: ''
         };
     },
     methods: {
+        handleErrorModalClose() {
+            this.modalError = ''
+            this.modalErrorStatus = ''
+        },
         fetchReaders() {
             this.loading = true
             this.error = null
@@ -119,7 +134,23 @@ export default {
                 })
                 .catch(error => {
                     console.error('Error deleting reader:', error)
-                    alert('Error occured while deleting reader')
+                    this.deleteModal.hide()
+                    const status = error?.response?.status
+                    const message = error?.response?.data?.message || "Unexpected error"
+                    const status2 = error?.response?.data?.status || 500
+
+                    if (status === 404) {
+                        this.$router.push({
+                            name: 'ErrorPage',
+                            query: {
+                                message,
+                                status2
+                            }
+                        })
+                    } else {
+                        this.modalError = message
+                        this.modalErrorStatus = error?.response?.data?.status
+                    }
                 })
         }
     },
