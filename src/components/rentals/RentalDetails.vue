@@ -3,9 +3,6 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Rental Details</h1>
         <div>
-          <router-link to="/rentals" class="btn btn-secondary me-2">
-            <i class="bi bi-arrow-left"></i> Back
-          </router-link>
           <router-link :to="`/rentals/edit/${id}`" class="btn btn-warning">
             <i class="bi bi-pencil"></i> Edit
           </router-link>

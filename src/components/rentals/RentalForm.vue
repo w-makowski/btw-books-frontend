@@ -2,9 +2,6 @@
     <div class="rentals-form">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>{{ isEditing ? 'Edit rental' : 'Add rental' }}</h1>
-        <router-link to="/rentals" class="btn btn-secondary">
-          <i class="bi bi-arrow-left"></i> Back
-        </router-link>
       </div>
       
       <LoadingSpinner v-if="loading" />

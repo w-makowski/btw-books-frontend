@@ -2,9 +2,6 @@
     <div class="reader-form">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>{{ isEditing ? 'Edit reader' : 'Add reader' }}</h1>
-        <router-link to="/readers" class="btn btn-secondary">
-          <i class="bi bi-arrow-left"></i> Back
-        </router-link>
       </div>
       
       <LoadingSpinner v-if="loading" />

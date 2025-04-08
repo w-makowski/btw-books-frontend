@@ -2,9 +2,6 @@
     <div class="author-form">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>{{ isEditing ? 'Edit author' : 'Add author' }}</h1>
-        <router-link to="/authors" class="btn btn-secondary">
-          <i class="bi bi-arrow-left"></i> Back
-        </router-link>
       </div>
       
       <LoadingSpinner v-if="loading" />

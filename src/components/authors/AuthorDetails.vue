@@ -3,9 +3,6 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Author Details</h1>
         <div>
-          <router-link to="/authors" class="btn btn-secondary me-2">
-            <i class="bi bi-arrow-left"></i> Back
-          </router-link>
           <router-link :to="`/authors/edit/${id}`" class="btn btn-warning">
             <i class="bi bi-pencil"></i> Edit
           </router-link>
@@ -39,36 +36,45 @@
           </div>
         </div>
         
-        <!-- WORK IN PROGRESS: -->
-        <div class="mt-4">
-          <h2>Books by this author</h2>
-          <LoadingSpinner v-if="loading" />
-          <ErrorMessage v-else-if="error" :message="error" @retry="loadAuthorBooks" />
-          <div v-else>
-            <table class="table" v-if="authorBooks.length">
-              <thead>
-              <tr>
-                <th>Title</th>
-                <th>Pages</th>
-                <th>Actions</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr v-for="book in authorBooks" :key="book.id">
-                <td>{{ book.title }}</td>
-                <td>{{ book.pages }}</td>
-                <td>
-                  <router-link :to="`/books/${book.id}`" class="btn btn-sm btn-info">
-                    View
-                  </router-link>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-            <p v-else>No books found for this author.</p>
-          </div>
-        </div>
-      </div>
+        <div class="col-12">
+           <div class="card">
+             <div class="card-header d-flex justify-content-between align-items-center">
+               <h5 class="mb-0">Author's books</h5>
+               <span class="badge bg-info">{{ authorBooks ? authorBooks.length : 0 }} books</span>
+             </div>
+             <div class="card-body">
+               <div v-if="!authorBooks || authorBooks.length === 0" class="text-center py-4">
+                 <p class="mb-0">This author doesn't have any books in our library</p>
+               </div>
+               <div v-else class="table-responsive">
+                 <table class="table table-striped table-hover">
+                   <thead>
+                     <tr>
+                       <th>ID</th>
+                       <th>Title</th>
+                       <th>Pages</th>
+                       <th>Actions</th>
+                     </tr>
+                   </thead>
+                   <tbody>
+                     <tr v-for="book in authorBooks" :key="book.id">
+                       <td>{{ book.id }}</td>
+                       <td>{{ book.title }}</td>
+                       <td>{{ book.pages }}
+                       </td>
+                       <td>
+                         <router-link :to="`/books/${book.id}`" class="btn btn-sm btn-info">
+                           <i class="bi bi-eye"></i> details
+                         </router-link>
+                       </td>
+                     </tr>
+                   </tbody>
+                 </table>
+               </div>
+             </div>
+            </div>
+         </div>
+       </div>
       
       <div v-else class="alert alert-warning">
         Nie znaleziono autora o podanym ID

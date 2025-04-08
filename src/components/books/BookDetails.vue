@@ -3,9 +3,6 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Book Details</h1>
         <div>
-          <router-link to="/books" class="btn btn-secondary me-2">
-            <i class="bi bi-arrow-left"></i> Back
-          </router-link>
           <router-link :to="`/books/edit/${id}`" class="btn btn-warning">
             <i class="bi bi-pencil"></i> Edit
           </router-link>
@@ -40,38 +37,49 @@
           </div>
         </div>
         
-        <!-- WORK IN PROGRESS: -->
-        <div class="mt-4">
-          <h2>Book's Rentals</h2>
-          <LoadingSpinner v-if="loading" />
-          <ErrorMessage v-else-if="error" :message="error" @retry="loadBookRentals" />
-          <div v-else>
-            <table class="table" v-if="bookRentals.length">
-              <thead>
-              <tr>
-                <th>Reader</th>
-                <th>Rental Date</th>
-                <th>Return Date</th>
-                <th>Actions</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr v-for="rental in bookRentals" :key="rental.id">
-                <td>{{ getReaderName(rental.readerId) }}</td>
-                <td>{{ formatDate(rental.rentalDate) }}</td>
-                <td>{{ rental.returnDate ? formatDate(rental.returnDate) : 'Not returned' }}</td>
-                <td>
-                  <div class="btn-group">
-                    <router-link :to="`/rentals/${rental.id}`" class="btn btn-sm btn-info">
-                      View
-                      <i class="bi bi-eye"></i>
-                    </router-link>
-                  </div>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-            <p v-else>No rentals found for this book.</p>
+        <div class="col-12">
+           <div class="card">
+             <div class="card-header d-flex justify-content-between align-items-center">
+               <h5 class="mb-0">Book's rentals</h5>
+               <span class="badge bg-info">{{ bookRentals ? bookRentals.length : 0 }} rentals</span>
+             </div>
+             <div class="card-body">
+               <div v-if="!bookRentals || bookRentals.length === 0" class="text-center py-4">
+                 <p class="mb-0">This book doesn't have any rentals in our library</p>
+               </div>
+               <div v-else class="table-responsive">
+                 <table class="table table-striped table-hover">
+                   <thead>
+                     <tr>
+                       <th>ID</th>
+                       <th>Reader</th>
+                       <th>Rental Date</th>
+                       <th>Return Date</th>
+                       <th>Status</th>
+                       <th>Actions</th>
+                     </tr>
+                   </thead>
+                   <tbody>
+                     <tr v-for="rental in bookRentals" :key="rental.id">
+                       <td>{{ rental.id }}</td>
+                       <td>{{ getReaderName(rental.readerId) }}</td>
+                       <td>{{ formatDate(rental.rentalDate) }}</td>
+                       <td>{{ rental.returnDate ? formatDate(rental.returnDate) : 'Not returned' }}</td>
+                       <td>
+                         <span :class="getStatusBadgeClass(rental)">
+                           {{ rental.returnDate ? 'Available' : 'Rented' }}
+                         </span>
+                       </td>
+                       <td>
+                         <router-link :to="`/rentals/${rental.id}`" class="btn btn-sm btn-info">
+                           <i class="bi bi-eye"></i> details
+                         </router-link>
+                       </td>
+                     </tr>
+                   </tbody>
+                 </table>
+               </div>
+            </div>
           </div>
         </div>
       </div>

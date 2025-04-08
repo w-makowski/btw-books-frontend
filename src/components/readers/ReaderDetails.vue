@@ -3,9 +3,6 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Reader Details</h1>
         <div>
-          <router-link to="/readers" class="btn btn-secondary me-2">
-            <i class="bi bi-arrow-left"></i> Back
-          </router-link>
           <router-link :to="`/readers/edit/${id}`" class="btn btn-warning">
             <i class="bi bi-pencil"></i> Edit
           </router-link>
@@ -27,39 +24,49 @@
           </div>
         </div>
         
-        <!-- WORK IN PROGRESS: -->
-        <div class="mt-4">
-          <h2>Reader's Rentals</h2>
-          <LoadingSpinner v-if="loading" />
-          <ErrorMessage v-else-if="error" :message="error" @retry="loadReaderRentals" />
-          <div v-else>
-            <table class="table" v-if="readerRentals.length">
-              <thead>
-              <tr>
-                <th>Book</th>
-                <th>Rental Date</th>
-                <th>Return Date</th>
-                <th>Actions</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr v-for="rental in readerRentals" :key="rental.id">
-                <td>{{ getBookTitle(rental.bookId) }}</td>
-                <td>{{ formatDate(rental.rentalDate) }}</td>
-                <td>{{ rental.returnDate ? formatDate(rental.returnDate) : 'Not returned' }}</td>
-                <td>
-                  <div class="btn-group">
-
-                    <router-link :to="`/rentals/${rental.id}`" class="btn btn-sm btn-info">
-                      View
-                      <i class="bi bi-eye"></i>
-                    </router-link>
-                  </div>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-            <p v-else>No rentals found for this reader.</p>
+        <div class="col-12">
+           <div class="card">
+             <div class="card-header d-flex justify-content-between align-items-center">
+               <h5 class="mb-0">Reader's rentals</h5>
+               <span class="badge bg-info">{{ readerRentals ? readerRentals.length : 0 }} rentals</span>
+             </div>
+             <div class="card-body">
+               <div v-if="!readerRentals || readerRentals.length === 0" class="text-center py-4">
+                 <p class="mb-0">This reader doesn't have any rentals in our library</p>
+               </div>
+               <div v-else class="table-responsive">
+                 <table class="table table-striped table-hover">
+                   <thead>
+                     <tr>
+                       <th>ID</th>
+                       <th>Book</th>
+                       <th>Rental Date</th>
+                       <th>Return Date</th>
+                       <th>Status</th>
+                       <th>Actions</th>
+                     </tr>
+                   </thead>
+                   <tbody>
+                     <tr v-for="rental in readerRentals" :key="rental.id">
+                       <td>{{ rental.id }}</td>
+                       <td>{{ getBookTitle(rental.bookId) }}</td>
+                       <td>{{ formatDate(rental.rentalDate) }}</td>
+                       <td>{{ rental.returnDate ? formatDate(rental.returnDate) : 'Not returned' }}</td>
+                       <td>
+                         <span :class="getStatusBadgeClass(rental)">
+                           {{ rental.returnDate ? 'Returned' : 'Rented' }}
+                         </span>
+                       </td>
+                       <td>
+                         <router-link :to="`/rentals/${rental.id}`" class="btn btn-sm btn-info">
+                           <i class="bi bi-eye"></i> details
+                         </router-link>
+                       </td>
+                     </tr>
+                   </tbody>
+                 </table>
+               </div>
+             </div>
           </div>
         </div>
       </div>
@@ -160,7 +167,7 @@ import booksService from "@/services/booksService.js";
         return new Date(dateString).toLocaleDateString('pl-PL')
       },
       getStatusBadgeClass(rental) {
-        return rental.returned ? 'badge bg-success' : 'badge bg-warning'
+        return rental.returnDate ? 'badge bg-success' : 'badge bg-warning'
       }
     }
   }
