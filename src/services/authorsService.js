@@ -18,5 +18,8 @@ export default {
     },
     delete(id) {
         return api.delete(`/authors/delete/author/${id}`)
+    },
+    getBooks(id){
+        return api.get(`/authors/${id}/books`)
     }
 }
