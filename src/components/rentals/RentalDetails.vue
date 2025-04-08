@@ -71,7 +71,7 @@
                         <td>{{ formatDate(rental.returnDate) }}</td>
                         <td>
                         <span :class="getStatusBadgeClass(rental)">
-                            {{ rental.returnDate ? 'Available' : 'Rented' }}
+                            {{ rental.returnDate ? 'Returned' : 'Rented' }}
                         </span>
                         </td>
                         <td>
