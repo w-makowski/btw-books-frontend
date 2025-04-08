@@ -28,45 +28,38 @@
         </div>
         
         <!-- WORK IN PROGRESS: -->
-        <div class="col-12">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">Reader's rentals</h5>
-              <span class="badge bg-info">{{ reader.rentals ? reader.rental.length : 0 }} rentals</span>
-            </div>
-            <div class="card-body">
-              <div v-if="!reader.rentals || reader.rentals.length === 0" class="text-center py-4">
-                <p class="mb-0">This reader doesn't have any rentals in our library</p>
-              </div>
-              <div v-else class="table-responsive">
-                <table class="table table-striped table-hover">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Book ID</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="rental in author.rentals" :key="rental.id">
-                      <td>{{ rental.id }}</td>
-                      <td>{{ rental.bookId }}</td>
-                      <td>
-                        <span :class="getStatusBadgeClass(book)">
-                          {{ rental.returned ? 'Returned' : 'Rented' }}
-                        </span>
-                      </td>
-                      <td>
-                        <router-link :to="`/rentals/${rental.id}`" class="btn btn-sm btn-info">
-                          <i class="bi bi-eye"></i> Details
-                        </router-link>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        <div class="mt-4">
+          <h2>Reader's Rentals</h2>
+          <LoadingSpinner v-if="loading" />
+          <ErrorMessage v-else-if="error" :message="error" @retry="loadReaderRentals" />
+          <div v-else>
+            <table class="table" v-if="readerRentals.length">
+              <thead>
+              <tr>
+                <th>Book</th>
+                <th>Rental Date</th>
+                <th>Return Date</th>
+                <th>Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="rental in readerRentals" :key="rental.id">
+                <td>{{ getBookTitle(rental.bookId) }}</td>
+                <td>{{ formatDate(rental.rentalDate) }}</td>
+                <td>{{ rental.returnDate ? formatDate(rental.returnDate) : 'Not returned' }}</td>
+                <td>
+                  <div class="btn-group">
+
+                    <router-link :to="`/rentals/${rental.id}`" class="btn btn-sm btn-info">
+                      View
+                      <i class="bi bi-eye"></i>
+                    </router-link>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+            <p v-else>No rentals found for this reader.</p>
           </div>
         </div>
       </div>
@@ -81,6 +74,7 @@
 import readersService from '@/services/readersService'
 import LoadingSpinner from '@/components/shared/LoadingSpinner.vue'
 import ErrorMessage from '@/components/shared/ErrorMessage.vue'
+import booksService from "@/services/booksService.js";
   
   export default {
     name: 'ReaderDetails',
@@ -98,13 +92,54 @@ import ErrorMessage from '@/components/shared/ErrorMessage.vue'
       return {
         reader: null,
         loading: true,
-        error: null
+        error: null,
+        readerRentals: [],
+        books: {}
       }
     },
     mounted() {
+      this.loadReaderRentals()
       this.loadReader()
     },
     methods: {
+      loadReaderRentals(){
+        this.loading = true
+        this.error  = null
+
+        readersService.getRentals(this.id)
+          .then(response => {
+            this.readerRentals = response.data
+            this.loadBookTitles()
+          })
+          .catch(error => {
+            console.error('Error loading reader rentals:', error)
+            this.error = 'Nie udało się załadować wypożyczeń czytelnika. Spróbuj ponownie później.'
+          })
+            .finally(() => {
+              this.loading = false
+            })
+      },
+      loadBookTitles() {
+        const bookIds = [...new Set(this.readerRentals.map(rental => rental.bookId))]
+
+        bookIds.forEach(bookId => {
+          if (!this.books[bookId]) {
+            this.books[bookId] = 'Loading...'
+
+            booksService.get(bookId)
+                .then(response => {
+                  this.books[bookId] = response.data.title
+                })
+                .catch(error => {
+                  console.error(`Error loading book ${bookId}:`, error)
+                  this.books[bookId] = 'Unknown book'
+                })
+          }
+        })
+      },
+      getBookTitle(bookId) {
+        return this.books[bookId] || 'Loading...'
+      },
       loadReader() {
         this.loading = true
         this.error = null

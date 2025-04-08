@@ -41,49 +41,40 @@
         </div>
         
         <!-- WORK IN PROGRESS: -->
-        <div class="col-12">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">Book's rentals</h5>
-              <span class="badge bg-info">{{ book.rentals ? book.rentals.length : 0 }} rentals</span>
-            </div>
-            <div class="card-body">
-              <div v-if="!book.rentals || book.rentals.length === 0" class="text-center py-4">
-                <p class="mb-0">This book doesn't have any rentals in our library</p>
-              </div>
-              <div v-else class="table-responsive">
-                <table class="table table-striped table-hover">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Reader ID</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="rental in book.rentals" :key="rental.id">
-                      <td>{{ rental.id }}</td>
-                      <td>{{ rental.readerId }}</td>
-                      <td>
-                        <span :class="getStatusBadgeClass(rental)">
-                          {{ rental.returnDate ? 'Available' : 'Rented' }}
-                        </span>
-                      </td>
-                      <td>
-                        <router-link :to="`/rentals/${rental.id}`" class="btn btn-sm btn-info">
-                          <i class="bi bi-eye"></i> Details
-                        </router-link>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        <div class="mt-4">
+          <h2>Book's Rentals</h2>
+          <LoadingSpinner v-if="loading" />
+          <ErrorMessage v-else-if="error" :message="error" @retry="loadBookRentals" />
+          <div v-else>
+            <table class="table" v-if="bookRentals.length">
+              <thead>
+              <tr>
+                <th>Reader</th>
+                <th>Rental Date</th>
+                <th>Return Date</th>
+                <th>Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="rental in bookRentals" :key="rental.id">
+                <td>{{ getReaderName(rental.readerId) }}</td>
+                <td>{{ formatDate(rental.rentalDate) }}</td>
+                <td>{{ rental.returnDate ? formatDate(rental.returnDate) : 'Not returned' }}</td>
+                <td>
+                  <div class="btn-group">
+                    <router-link :to="`/rentals/${rental.id}`" class="btn btn-sm btn-info">
+                      View
+                      <i class="bi bi-eye"></i>
+                    </router-link>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+            <p v-else>No rentals found for this book.</p>
           </div>
         </div>
       </div>
-      
       <div v-else class="alert alert-warning">
         Nie znaleziono ksiązki o podanym ID
       </div>
@@ -95,6 +86,7 @@ import booksService from '@/services/booksService'
 import authorsService from '@/services/authorsService'
 import LoadingSpinner from '@/components/shared/LoadingSpinner.vue'
 import ErrorMessage from '@/components/shared/ErrorMessage.vue'
+import readersService from "@/services/readersService.js";
   
   export default {
     name: 'BookDetails',
@@ -112,13 +104,75 @@ import ErrorMessage from '@/components/shared/ErrorMessage.vue'
       return {
         book: null,
         loading: true,
-        error: null
+        error: null,
+        bookRentals: [],
+        readers: {}
       }
     },
     mounted() {
       this.loadBook()
+      this.loadBookRentals()
     },
     methods: {
+      loadBookRentals() {
+        console.log('1. Starting loadBookRentals')
+        this.loading = true
+
+        booksService.getRentals(this.id)
+            .then(response => {
+              console.log('2. Received rentals:', response.data)
+              this.bookRentals = response.data
+              console.log('3. Set bookRentals:', this.bookRentals)
+
+              if (this.bookRentals.length > 0) {
+                console.log('4. Loading reader names')
+                this.loadReaderNames()
+              } else {
+                console.log('4. No rentals to process')
+              }
+            })
+            .catch(error => {
+              console.error('Error details:', {
+                code: error.code,
+                message: error.message,
+                response: error.response?.data
+              })
+              this.error = 'Nie udało się załadować wypożyczeń książki. Spróbuj ponownie później.'
+            })
+            .finally(() => {
+              console.log('5. Request completed, loading:', this.loading)
+              this.loading = false
+            })
+      },
+      loadReaderNames() {
+        console.log('Starting loadReaderNames')
+        const readerIds = [...new Set(this.bookRentals.map(rental => rental.readerId))]
+        console.log('Unique reader IDs:', readerIds)
+
+        readerIds.forEach(readerId => {
+          console.log('Processing reader ID:', readerId)
+          if (!this.readers[readerId]) {
+            console.log('Reader not cached, loading:', readerId)
+            this.readers[readerId] = 'Loading...'
+
+            readersService.get(readerId)
+                .then(response => {
+                  console.log(`Reader ${readerId} API response:`, response)
+                  this.readers[readerId] = response.data.name
+                  console.log(`Updated reader ${readerId} name to:`, this.readers[readerId])
+                })
+                .catch(error => {
+                  console.error(`Error loading reader ${readerId}:`, error)
+                  this.readers[readerId] = 'Unknown reader'
+                })
+          } else {
+            console.log('Using cached reader name for ID:', readerId)
+          }
+        })
+      },
+      getReaderName(readerId) {
+        return this.readers[readerId] || 'Loading...'
+      },
         loadBook() {
     this.loading = true;
     this.error = null;
