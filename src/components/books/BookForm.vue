@@ -6,20 +6,20 @@
           <i class="bi bi-arrow-left"></i> Back
         </router-link>
       </div>
-      
+
       <LoadingSpinner v-if="loading" />
       <ErrorMessage v-else-if="error" :message="error" @retry="loadBook" />
-      
+
       <div v-else class="card">
         <div class="card-body">
           <form @submit.prevent="saveBook" novalidate>
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="title" class="form-label">Title *</label>
-                <input 
-                  type="text" 
-                  class="form-control" 
-                  id="title" 
+                <input
+                  type="text"
+                  class="form-control"
+                  id="title"
                   v-model="form.title"
                   :class="{ 'is-invalid': submitted && !form.title }"
                   required
@@ -28,30 +28,27 @@
               </div>
 
               <div class="col-md-6">
-                <label for="authorId" class="form-label">Author*</label>
-                <select
-                    class="form-select"
-                    id="authorId"
+                <label for="authorId" class="form-label">Author *</label>
+                <Multiselect
                     v-model="form.authorId"
+                    :options="authors.map(a => ({value: a.id, label: `${a.id} - ${a.name}`}))"
+                    :searchable="true"
+                    placeholder="Select or type to search an author"
+                    valueProp="value"
                     :class="{ 'is-invalid': submitted && !form.authorId }"
                     :disabled="loading"
-                    required
-                >
-                  <option value="">{{ loading ? 'Loading...' : 'Select an author' }}</option>
-                  <option v-for="author in authors" :key="author.id" :value="author.id">
-                    {{ author.id }} - {{ author.name }}
-                  </option>
-                </select>
+                />
+                <div class="invalid-feedback">Author is required</div>
               </div>
 
               <div class="col-md-6">
                 <label for="pages" class="form-label">Pages *</label>
-                <input 
+                <input
                   type="number"
                   min="0"
                   step="1"
-                  class="form-control" 
-                  id="pages" 
+                  class="form-control"
+                  id="pages"
                   v-model="form.pages"
                   :class="{ 'is-invalid': submitted && !form.pages }"
                   required
@@ -59,7 +56,7 @@
                 <div class="invalid-feedback">Pages number is obligatory</div>
               </div>
             </div>
-            
+
             <div class="d-flex justify-content-end gap-2">
               <button type="button" class="btn btn-secondary" @click="$router.push('/books')">
                 Cancel
@@ -74,20 +71,23 @@
       </div>
     </div>
 </template>
-  
+
 <script>
+import Multiselect from '@vueform/multiselect'
+import '@vueform/multiselect/themes/default.css'
 import booksService from '@/services/booksService'
 import authorsService from '@/services/authorsService'
 import LoadingSpinner from '@/components/shared/LoadingSpinner.vue'
 import ErrorMessage from '@/components/shared/ErrorMessage.vue'
 import ErrorModal from '@/components/shared/ErrorModal.vue'
-  
+
   export default {
     name: 'BookForm',
     components: {
       LoadingSpinner,
       ErrorMessage,
-      ErrorModal
+      ErrorModal,
+      Multiselect
     },
     props: {
       id: {
@@ -148,15 +148,15 @@ import ErrorModal from '@/components/shared/ErrorModal.vue'
       loadBook() {
         this.loading = true
         this.error = null
-        
+
         booksService.get(this.id)
           .then(response => {
             const book = response.data
-            
+
             this.form = {
               ...book,
             }
-            
+
             this.loading = false
           })
           .catch(error => {
@@ -168,26 +168,26 @@ import ErrorModal from '@/components/shared/ErrorModal.vue'
       validateForm() {
         this.submitted = true
         this.dateError = ''
-        
+
         if (!this.form.title || !this.form.authorId || !this.form.pages) {
           return false
         }
-        
+
         return true
       },
       saveBook() {
         if (!this.validateForm()) {
           return
         }
-        
+
         this.isSaving = true
-        
+
         const bookData = { ...this.form }
-        
+
         const savePromise = this.isEditing
           ? booksService.update(this.id, bookData)
           : booksService.create(bookData)
-        
+
         savePromise
           .then(() => {
             this.$router.push('/books')

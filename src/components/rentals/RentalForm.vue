@@ -23,36 +23,36 @@
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="bookId" class="form-label">Book</label>
-                <select
-                    class="form-select"
-                    id="bookId"
+                <Multiselect
                     v-model="form.bookId"
+                    :options="books.map(b => ({
+        value: b.id,
+        label: `${b.id} - ${b.title} (${b.authorName})`
+      }))"
+                    :searchable="true"
+                    placeholder="Select or type to search a book"
+                    valueProp="value"
                     :class="{ 'is-invalid': submitted && !form.bookId }"
                     :disabled="loading"
-                    required
-                >
-                  <option value="">{{ loading ? 'Loading...' : 'Select a book' }}</option>
-                  <option v-for="book in books" :key="book.id" :value="book.id">
-                    {{ book.id }} - {{ book.title }} ({{book.authorName }})
-                  </option>
-                </select>
+                />
+                <div class="invalid-feedback">Book is required</div>
               </div>
 
               <div class="col-md-6">
                 <label for="readerId" class="form-label">Reader</label>
-                <select
-                    class="form-select"
-                    id="readerId"
+                <Multiselect
                     v-model="form.readerId"
+                    :options="readers.map(r => ({
+                    value: r.id,
+                    label: `${r.id} - ${r.name}`
+                    }))"
+                    :searchable="true"
+                    placeholder="Select or type to search a reader"
+                    valueProp="value"
                     :class="{ 'is-invalid': submitted && !form.readerId }"
                     :disabled="loading"
-                    required
-                >
-                  <option value="">{{ loading ? 'Loading...' : 'Select a reader' }}</option>
-                  <option v-for="reader in readers" :key="reader.id" :value="reader.id">
-                    {{ reader.id }} - {{ reader.name }}
-                  </option>
-                </select>
+                />
+                <div class="invalid-feedback">Reader is required</div>
               </div>
 
               <div class="col-md-6">
@@ -101,11 +101,13 @@
 <script>
 import rentalsService from '@/services/rentalsService'
 import booksService from '@/services/booksService'
-import readersService from "@/services/readersService.js";
+import readersService from "@/services/readersService.js"
 import LoadingSpinner from '@/components/shared/LoadingSpinner.vue'
 import ErrorMessage from '@/components/shared/ErrorMessage.vue'
 import ErrorModal from '@/components/shared/ErrorModal.vue'
-import authorsService from "@/services/authorsService.js";
+import authorsService from "@/services/authorsService.js"
+import Multiselect from '@vueform/multiselect'
+import '@vueform/multiselect/themes/default.css'
 
   
   export default {
@@ -113,7 +115,8 @@ import authorsService from "@/services/authorsService.js";
     components: {
       LoadingSpinner,
       ErrorMessage,
-      ErrorModal
+      ErrorModal,
+      Multiselect
     },
     props: {
       id: {
